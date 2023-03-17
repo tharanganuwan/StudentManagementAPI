@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Todos\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StudentManagementAPI.DataAccess\StudentManagementAPI.DataAccess.csproj" />
+    <ProjectReference Include="..\StudentManagementAPI.Models\StudentManagementAPI.Models.csproj" />
+  </ItemGroup>
+
+</Project>
