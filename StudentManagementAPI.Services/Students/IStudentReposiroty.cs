@@ -14,5 +14,6 @@ namespace StudentManagementAPI.Services.Students
         public Student CreateStudent(Student newStudents);
         public void DeleteStudent(int studentId);
         public void UpdateStudent(Student student);
+        public List<Student> SerchFromName(String name);
     }
 }

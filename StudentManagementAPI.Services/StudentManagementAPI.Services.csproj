@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Todos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\StudentManagementAPI.DataAccess\StudentManagementAPI.DataAccess.csproj" />
     <ProjectReference Include="..\StudentManagementAPI.Models\StudentManagementAPI.Models.csproj" />
   </ItemGroup>

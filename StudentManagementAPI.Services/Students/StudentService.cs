@@ -63,5 +63,11 @@ namespace StudentManagementAPI.Services.Students
             
             
         }
+
+        public List<Student> SerchFromName(string name)
+        {
+            var studentName = new SqlParameter("@Name", name);
+            return _context.Student.FromSqlRaw($"SearchStudentFromName @Name", studentName).ToList();
+        }
     }
 }

@@ -14,6 +14,10 @@ namespace StudentManagementAPI.Services.Profiles
         public StudentProfile()
         {
             CreateMap<CreateStudentDto, Student>();
+            CreateMap<Student, StudentDto>()
+                .ForMember(name => name.Name, opt => opt
+                .MapFrom(src => $"{src.FirstName} {src.MiddleName} {src.LastName}"));
         }
     }
 }
+

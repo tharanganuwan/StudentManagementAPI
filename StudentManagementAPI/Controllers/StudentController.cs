@@ -1,12 +1,18 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using StudentManagementAPI.Helpers;
 using StudentManagementAPI.Models;
 using StudentManagementAPI.Services.Dtos;
 using StudentManagementAPI.Services.Students;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace StudentManagementAPI.Controllers
@@ -24,21 +30,53 @@ namespace StudentManagementAPI.Controllers
             _mapper = mapper;
         }
 
+        [HttpGet("authenticate")]
+        public IActionResult Authenticate() 
+        {
+            var claims = new[]
+             {
+                new Claim("FullName","Tharanga Nuwan"),
+                new Claim(JwtRegisteredClaimNames.Sub,"user_id")
+             };
+
+            var keyBytes = Encoding.UTF8.GetBytes(Constants.Secret);
+            var key = new SymmetricSecurityKey(keyBytes);
+
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                Constants.Audience,
+                Constants.Issure,
+                claims,
+                notBefore: DateTime.Now,
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials);
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new { accessToken = tokenString });
+        }
+
+
+
+
         [HttpPost]
-        public IActionResult CreateStudent(CreateStudentDto student) 
+        public ActionResult<StudentDto> CreateStudent(CreateStudentDto student) 
         {
             var studentEntity = _mapper.Map<Student>(student);
             var createdStudent =  _service.CreateStudent(studentEntity);
-
-            return Ok(createdStudent);
+            var returnStudent = _mapper.Map<StudentDto>(createdStudent);
+            return Ok(returnStudent);
         }
 
         [HttpGet]
-        public IActionResult GetAllStudents() {
+        public ActionResult<StudentDto> GetAllStudents() {
             List<Student> students = _service.GetAllStudents();
             if (students is null) return NoContent();
 
-            return Ok(students);
+            var returnStudents = _mapper.Map<ICollection<StudentDto>>(students);
+
+            return Ok(returnStudents);
         }
 
         [HttpGet("{studentId}")]
@@ -46,9 +84,11 @@ namespace StudentManagementAPI.Controllers
         {
             Student student = _service.GetStudent(studentId);
             if (student is null) return NotFound();
-            return Ok(student);
+            var returnStudent = _mapper.Map<StudentDto>(student);
+            return Ok(returnStudent);
         }
 
+        [Authorize]
         [HttpDelete("{studentId}")]
         public IActionResult DeleteStudent(int studentId) 
         {
@@ -62,6 +102,7 @@ namespace StudentManagementAPI.Controllers
             return Ok();
         }
 
+        [Authorize]
         [HttpPut("{studentId}")]
         public IActionResult UpdateStudent(int studentId, CreateStudentDto studentDto)
         {
@@ -78,6 +119,14 @@ namespace StudentManagementAPI.Controllers
             return Ok();
         }
 
+        [HttpGet("/search")]
+        public ActionResult<ICollection<StudentDto>> SearchStudentFromName([FromQuery] String name)
+        {
+            List<Student> students = _service.SerchFromName(name);
+            if (students is null) return NoContent();
+            var studentDtos = _mapper.Map<ICollection<StudentDto>>(students);
+            return Ok(studentDtos);
+        }
 
     }
 }
