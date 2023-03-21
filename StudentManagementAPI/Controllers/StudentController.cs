@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using StudentManagementAPI.Helpers;
 using StudentManagementAPI.Models;
@@ -23,14 +24,16 @@ namespace StudentManagementAPI.Controllers
     {
         private readonly IStudentReposiroty _service;
         private readonly IMapper _mapper;
+        private readonly ILogger<StudentController> _logger;
 
-        public StudentController(IStudentReposiroty service, IMapper mapper)
+        public StudentController(IStudentReposiroty service, IMapper mapper, ILogger<StudentController> logger)
         {
             _service = service;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        [HttpGet("authenticate")]
+        [HttpGet("authenticateJWT")]
         public IActionResult Authenticate() 
         {
             var claims = new[]
@@ -59,13 +62,14 @@ namespace StudentManagementAPI.Controllers
 
 
 
-
+        [Authorize]
         [HttpPost]
         public ActionResult<StudentDto> CreateStudent(CreateStudentDto student) 
         {
             var studentEntity = _mapper.Map<Student>(student);
             var createdStudent =  _service.CreateStudent(studentEntity);
             var returnStudent = _mapper.Map<StudentDto>(createdStudent);
+            _logger.LogInformation("add student : "+returnStudent);
             return Ok(returnStudent);
         }
 
@@ -98,7 +102,7 @@ namespace StudentManagementAPI.Controllers
                 return NoContent();
             }
             _service.DeleteStudent(studentId);
-
+            _logger.LogInformation("Deleted student Id : " + studentId);
             return Ok();
         }
 
@@ -119,7 +123,7 @@ namespace StudentManagementAPI.Controllers
             return Ok();
         }
 
-        [HttpGet("/search")]
+        [HttpGet("search")]
         public ActionResult<ICollection<StudentDto>> SearchStudentFromName([FromQuery] String name)
         {
             List<Student> students = _service.SerchFromName(name);
