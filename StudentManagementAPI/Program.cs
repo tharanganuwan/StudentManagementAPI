@@ -28,7 +28,7 @@ namespace StudentManagementAPI
                     webBuilder.UseStartup<Startup>();
                 }).ConfigureLogging(opt=>{
                     opt.ClearProviders();
-                    opt.SetMinimumLevel(LogLevel.Trace);
+                    opt.SetMinimumLevel(LogLevel.Information);
                 }).UseNLog();
     }
 }

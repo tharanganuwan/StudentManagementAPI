@@ -31,23 +31,6 @@ namespace StudentManagementAPI.Services.Students
 
         }
 
-        public Student GetStudent(int id)
-        {
-            var studentId = new SqlParameter("@Id", id);
-            return _context.Student.FromSqlRaw($"GetStudentFromId @Id",studentId).AsEnumerable().FirstOrDefault();
-        }
-
-        public List<Student> GetAllStudents()
-        {
-            return _context.Student.FromSqlRaw($"GetAllStudents").ToList();
-        }
-
-        public void DeleteStudent(int studentId)
-        {
-            var employeeIdParam = new SqlParameter("@Id", studentId);
-            _context.Database.ExecuteSqlRaw("DeleteStudent @Id", employeeIdParam);
-        }
-
         public void UpdateStudent(Student student)
         {
             var idParam = new SqlParameter("@Id", student.Id);
@@ -60,8 +43,14 @@ namespace StudentManagementAPI.Services.Students
 
             _context.Database.ExecuteSqlRaw("UpdateStudent @Id, @FirstName, @MiddleName, @LastName, @Dob, @MotherName,@FatherName",
                 idParam, firstNameParam, middleNameParam, lastNameParam, dobParam, motherNameParam, fatherNameParam);
-            
-            
+
+
+        }
+
+        public void DeleteStudent(int studentId)
+        {
+            var employeeIdParam = new SqlParameter("@Id", studentId);
+            _context.Database.ExecuteSqlRaw("DeleteStudent @Id", employeeIdParam);
         }
 
         public List<Student> SerchFromName(string name)
@@ -69,5 +58,17 @@ namespace StudentManagementAPI.Services.Students
             var studentName = new SqlParameter("@Name", name);
             return _context.Student.FromSqlRaw($"SearchStudentFromName @Name", studentName).ToList();
         }
+
+        public Student GetStudent(int id)
+        {
+            return _context.Student.Include(s => s.todos).FirstOrDefault(s => s.Id == id);
+        }
+
+        public List<Student> GetAllStudents()
+        {
+           return  _context.Student.Include(s => s.todos).ToList();
+        }
+
+        
     }
 }
