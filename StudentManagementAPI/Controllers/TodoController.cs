@@ -28,63 +28,108 @@ namespace StudentManagementAPI.Controllers
         [HttpPost("{studentId}")]
         public ActionResult<TodoDto> CreateTodo(int studentId,CreateTodoDto todo) 
         {
-            var createTodoEntity = _mapper.Map<Todo>(todo);
-            var addedTodo = _service.CreateTodo(studentId, createTodoEntity);
-            var returnTodo = _mapper.Map<TodoDto>(addedTodo);
-            return Ok(returnTodo);
+            try
+            {
+                var createTodoEntity = _mapper.Map<Todo>(todo);
+                var addedTodo = _service.CreateTodo(studentId, createTodoEntity);
+                var returnTodo = _mapper.Map<TodoDto>(addedTodo);
+                return Ok(returnTodo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while Creating new todo: {ex.Message}");
+            }
+            
         }
         [HttpGet]
         public ActionResult<TodoDto> GetAllTodo() 
         {
-            List<Todo> todos = _service.GetAllTodos().ToList();
-            if (todos is null) return NoContent();
-            var todoDtos = _mapper.Map<ICollection<TodoDto>>(todos);
+            try
+            {
+                List<Todo> todos = _service.GetAllTodos().ToList();
+                if (todos is null) return NoContent();
+                var todoDtos = _mapper.Map<ICollection<TodoDto>>(todos);
 
-            return Ok(todoDtos);
+                return Ok(todoDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving Todos: {ex.Message}");
+
+            }    
         }
 
         
         [HttpGet("student/{studentId}")]
         public ActionResult<TodoDto> GetAllTodos(int studentId)
         {
-            List<Todo> todos = _service.GetAllTodos(studentId).ToList();
-            if (todos is null) return NoContent();
-            var todoDtos = _mapper.Map<ICollection<TodoDto>>(todos);
+            try
+            {
+                List<Todo> todos = _service.GetAllTodos(studentId).ToList();
+                if (todos is null) return NoContent();
+                var todoDtos = _mapper.Map<ICollection<TodoDto>>(todos);
 
-            return Ok(todoDtos);
+                return Ok(todoDtos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving Todo: {ex.Message}");
+            }
+            
         }
 
         [HttpGet("{todoId}")]
         public ActionResult<TodoDto> GetTodo(int todoId)
         {
-            var todo = _service.GetTodo(todoId);
-            if (todo is null) return NoContent();
-            var todoDto = _mapper.Map<TodoDto>(todo);
+            try
+            {
+                var todo = _service.GetTodo(todoId);
+                if (todo is null) return NoContent();
+                var todoDto = _mapper.Map<TodoDto>(todo);
 
-            return Ok(todoDto);
+                return Ok(todoDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving Todo: {ex.Message}");
+            }
         }
 
         [HttpDelete("{todoId}")]
         public IActionResult DeleteTodo(int todoId)
         {
-            var deleteTodo = _service.GetTodo(todoId);
-            if (deleteTodo is null) return NoContent();
-            _service.DeleteTodo(todoId);
-            return Ok();
+            try
+            {
+                var deleteTodo = _service.GetTodo(todoId);
+                if (deleteTodo is null) return NoContent();
+                _service.DeleteTodo(todoId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while Deleting Todo: {ex.Message}");
+            }
+            
         }
 
         [HttpPut("{todoId}")]
         public IActionResult UpdateTodo(int todoId,UpdateTodoDto todo)
         {
-            var updateTodo = _service.GetTodo(todoId);
-            if (updateTodo is null) return NoContent();
- 
+            try
+            {
+                var updateTodo = _service.GetTodo(todoId);
+                if (updateTodo is null) return NoContent();
+                var updatedTodo = _mapper.Map<Todo>(todo);
+                updatedTodo.Id = todoId;
+                _service.UpdateTodo(updatedTodo);
 
-            var updatedTodo= _mapper.Map<Todo>(todo);
-            updatedTodo.Id = todoId;
-            _service.UpdateTodo(updatedTodo);
-
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while Updadating Todo: {ex.Message}");
+            }
+            
         }
     }
 }

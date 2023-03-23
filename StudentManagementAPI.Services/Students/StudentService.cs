@@ -64,9 +64,13 @@ namespace StudentManagementAPI.Services.Students
             return _context.Student.Include(s => s.todos).FirstOrDefault(s => s.Id == id);
         }
 
+        // List<Student> students = _context.Student.FromSqlRaw("GetAllStudents").ToList();
+           // return students;
+
         public List<Student> GetAllStudents()
         {
-           return  _context.Student.Include(s => s.todos).ToList();
+            return _context.Student.Include(s => s.todos).ToList();
+            
         }
 
         

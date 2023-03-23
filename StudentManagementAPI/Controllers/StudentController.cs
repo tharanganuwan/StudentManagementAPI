@@ -36,28 +36,36 @@ namespace StudentManagementAPI.Controllers
         [HttpGet("authenticateJWT")]
         public IActionResult Authenticate() 
         {
-            var claims = new[]
+            try
+            {
+                var claims = new[]
              {
                 new Claim("FullName","Tharanga Nuwan"),
                 new Claim(JwtRegisteredClaimNames.Sub,"user_id")
              };
 
-            var keyBytes = Encoding.UTF8.GetBytes(Constants.Secret);
-            var key = new SymmetricSecurityKey(keyBytes);
+                var keyBytes = Encoding.UTF8.GetBytes(Constants.Secret);
+                var key = new SymmetricSecurityKey(keyBytes);
 
-            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                Constants.Audience,
-                Constants.Issure,
-                claims,
-                notBefore: DateTime.Now,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials);
+                var token = new JwtSecurityToken(
+                    Constants.Audience,
+                    Constants.Issure,
+                    claims,
+                    notBefore: DateTime.Now,
+                    expires: DateTime.Now.AddHours(1),
+                    signingCredentials);
 
-            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return Ok(new { accessToken = tokenString });
+                return Ok(new { accessToken = tokenString });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while Creating Token: {ex.Message}");
+            }
+            
         }
 
 
@@ -66,70 +74,121 @@ namespace StudentManagementAPI.Controllers
         [HttpPost]
         public ActionResult<StudentDto> CreateStudent(CreateStudentDto student) 
         {
-            var studentEntity = _mapper.Map<Student>(student);
-            var createdStudent =  _service.CreateStudent(studentEntity);
-            var returnStudent = _mapper.Map<StudentDto>(createdStudent);
-            _logger.LogInformation("add student : "+returnStudent);
-            return Ok(returnStudent);
+            try
+            {
+                var studentEntity = _mapper.Map<Student>(student);
+                var createdStudent = _service.CreateStudent(studentEntity);
+                var returnStudent = _mapper.Map<StudentDto>(createdStudent);
+                _logger.LogInformation("add student : " + returnStudent);
+                return Ok(returnStudent);
+            }
+            catch (Exception ex)
+            {
+                
+                return StatusCode(500, $"An error occurred while Save New student : {ex.Message}");
+            }
+
+            
         }
 
         [HttpGet]
         public ActionResult<StudentDto> GetAllStudents() {
-            List<Student> students = _service.GetAllStudents();
-            if (students is null) return NoContent();
-
-            var returnStudents = _mapper.Map<ICollection<StudentDto>>(students);
-
-            return Ok(returnStudents);
+            try
+            {
+                List<Student> students = _service.GetAllStudents();
+                if (students is null) return NoContent();
+                var returnStudents = _mapper.Map<ICollection<StudentDto>>(students);
+                return Ok(returnStudents);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving students: {ex.Message}");
+            }
         }
 
         [HttpGet("{studentId}")]
         public IActionResult GetAllStudents(int studentId)
         {
-            Student student = _service.GetStudent(studentId);
-            if (student is null) return NotFound();
-            var returnStudent = _mapper.Map<StudentDto>(student);
-            return Ok(returnStudent);
+            try
+            {
+                Student student = _service.GetStudent(studentId);
+                if (student is null) return NotFound();
+                var returnStudent = _mapper.Map<StudentDto>(student);
+                return Ok(returnStudent);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred while retrieving student: {ex.Message}");
+            }
+            
         }
 
         [Authorize]
         [HttpDelete("{studentId}")]
         public IActionResult DeleteStudent(int studentId) 
         {
-            var deleteStudent = _service.GetStudent(studentId);
-            if (deleteStudent is null)
+            try
             {
-                return NoContent();
+                var deleteStudent = _service.GetStudent(studentId);
+                if (deleteStudent is null)
+                {
+                    return NoContent();
+                }
+                _service.DeleteStudent(studentId);
+                _logger.LogInformation("Deleted student Id : " + studentId);
+                return Ok();
             }
-            _service.DeleteStudent(studentId);
-            _logger.LogInformation("Deleted student Id : " + studentId);
-            return Ok();
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred while Deleting student: {ex.Message}");
+            }
+
+            
         }
 
         [Authorize]
         [HttpPut("{studentId}")]
         public IActionResult UpdateStudent(int studentId, CreateStudentDto studentDto)
         {
-            var updateStudent = _service.GetStudent(studentId);
-            if (updateStudent is null)
+            try
             {
-                return NoContent();
+                var updateStudent = _service.GetStudent(studentId);
+                if (updateStudent is null)
+                {
+                    return NoContent();
+                }
+
+                var student = _mapper.Map<Student>(studentDto);
+                student.Id = studentId;
+                _service.UpdateStudent(student);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred while Updating student: {ex.Message}");
             }
             
-            var student = _mapper.Map<Student>(studentDto);
-            student.Id = studentId;
-            _service.UpdateStudent(student);
-
-            return Ok();
         }
 
         [HttpGet("search")]
         public ActionResult<ICollection<StudentDto>> SearchStudentFromName([FromQuery] String name)
         {
-            List<Student> students = _service.SerchFromName(name);
-            if (students is null) return NoContent();
-            var studentDtos = _mapper.Map<ICollection<StudentDto>>(students);
-            return Ok(studentDtos);
+            try
+            {
+                List<Student> students = _service.SerchFromName(name);
+                if (students is null) return NoContent();
+                var studentDtos = _mapper.Map<ICollection<StudentDto>>(students);
+                return Ok(studentDtos);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, $"An error occurred while Searching student: {ex.Message}");
+            }
+            
         }
 
     }
