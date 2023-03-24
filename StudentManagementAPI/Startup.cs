@@ -34,6 +34,8 @@ namespace StudentManagementAPI
             services.AddAuthentication("JWTAuth")
                 .AddJwtBearer("JWTAuth",options => 
                 {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
                     var keyBytes = Encoding.UTF8.GetBytes(Constants.Secret);
                     var key = new SymmetricSecurityKey(keyBytes);
 
@@ -41,7 +43,10 @@ namespace StudentManagementAPI
                     {
                         ValidIssuer = Constants.Issure,
                         ValidAudience = Constants.Audience,
-                        IssuerSigningKey = key
+                        IssuerSigningKey = key,
+                        ValidateIssuerSigningKey = true,
+                        ClockSkew = TimeSpan.Zero
+
                     };
                 });
 

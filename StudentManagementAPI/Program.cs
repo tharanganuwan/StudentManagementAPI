@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using NLog.Web;
 using System;
 using System.Collections.Generic;
@@ -26,9 +27,15 @@ namespace StudentManagementAPI
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                }).ConfigureLogging(opt=>{
-                    opt.ClearProviders();
-                    opt.SetMinimumLevel(LogLevel.Information);
+                }).ConfigureLogging(logging=>
+                {
+                    logging.ClearProviders();
+                    logging.AddNLog();
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    logging.SetMinimumLevel(LogLevel.Trace);
+             
                 }).UseNLog();
+        
     }
 }
