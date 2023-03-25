@@ -20,6 +20,7 @@ namespace StudentManagementAPI.Controllers
 {
     [Route("api/student")]
     [ApiController]
+    [Authorize]
     public class StudentController : ControllerBase
     {
         private readonly IStudentReposiroty _service;
@@ -33,45 +34,7 @@ namespace StudentManagementAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet("authenticateJWT")]
-        public IActionResult Authenticate() 
-        {
-            try
-            {
-                var claims = new[]
-             {
-                new Claim("FullName","Tharanga Nuwan"),
-                new Claim(JwtRegisteredClaimNames.Sub,"user_id")
-             };
 
-                var keyBytes = Encoding.UTF8.GetBytes(Constants.Secret);
-                var key = new SymmetricSecurityKey(keyBytes);
-
-                var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(
-                    Constants.Audience,
-                    Constants.Issure,
-                    claims,
-                    notBefore: DateTime.Now,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials);
-
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-                _logger.LogInformation($"Created  accessToken in Authenticate method");
-                return Ok(new { accessToken = tokenString });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error occurred while Creating Token: {ex.Message}");
-                return StatusCode(500, $"An error occurred while Creating Token: {ex.Message}");
-            }
-            
-        }
-
-
-
-        [Authorize]
         [HttpPost]
         public ActionResult<StudentDto> CreateStudent(CreateStudentDto student) 
         {
@@ -136,7 +99,6 @@ namespace StudentManagementAPI.Controllers
             
         }
 
-        [Authorize]
         [HttpDelete("{studentId}")]
         public IActionResult DeleteStudent(int studentId) 
         {
@@ -161,7 +123,6 @@ namespace StudentManagementAPI.Controllers
             
         }
 
-        [Authorize]
         [HttpPut("{studentId}")]
         public IActionResult UpdateStudent(int studentId, CreateStudentDto studentDto)
         {

@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using StudentManagementAPI.Helpers;
 using StudentManagementAPI.Services.Students;
 using StudentManagementAPI.Services.Todos;
+using StudentManagementAPI.Services.users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,6 +60,7 @@ namespace StudentManagementAPI
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IStudentReposiroty,StudentService>();
             services.AddScoped<ITodoReposiroty, TodoService>();
+            services.AddScoped<IUserRepository, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
